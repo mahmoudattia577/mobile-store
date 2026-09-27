@@ -1,0 +1,18 @@
+{
+  "name": "إدارة محل الموبايلات",
+  "short_name": "محل الموبايلات",
+  "description": "نظام إدارة مبيعات ومشتريات ومصروفات ومخزون وتحويلات لمحل موبايلات",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f5f7",
+  "theme_color": "#007aff",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
