@@ -52,7 +52,18 @@ td{padding:10px 8px;border-bottom:1px solid var(--bg);white-space:nowrap}
  </div>
  <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer;text-align:right"><input type="checkbox" id="rememberMe" checked style="width:auto"> <span class="k">تذكرني على الجهاز ده</span></label>
  <button class="btn" onclick="doLogin()" style="width:100%;margin-top:18px;padding:13px;font-size:15px;border-radius:14px">دخول</button>
- <div style="margin-top:16px;font-size:13px" class="k">مفيش حساب؟ <a href="#" onclick="doSignup();return false" style="color:var(--b);font-weight:700">اعمل حساب جديد</a></div>
+ <!-- ✨ جديد: فاصل + زر Google -->
+ <div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--m);font-size:12px">
+   <div style="flex:1;height:1px;background:var(--l)"></div>
+   <span>أو</span>
+   <div style="flex:1;height:1px;background:var(--l)"></div>
+ </div>
+ <button onclick="googleLogin()" style="width:100%;background:#fff;color:#1d1d1f;border:1px solid var(--l);border-radius:100px;padding:12px;font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+   <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 5.1 29.3 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c11 0 20-8 20-21 0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.2 8 3l5.7-5.7C34 7.1 29.3 5 24 5 16.3 5 9.7 9.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.1 5.6l6.2 5.2c-.4.4 6.6-4.8 6.6-14.8 0-1.2-.1-2.3-.4-3.5z"/></svg>
+   دخول بحساب Google
+ </button>
+ <!-- ✨ نهاية الجديد -->
+ <div style="margin-top:16px;font-size:13px" class="k">مفيش حساب؟ <a href="#" onclick="doSignup();return false" style="color:var(--b);font-weight:700">اعمل حساب جديد</a></div> <div style="margin-top:16px;font-size:13px" class="k">مفيش حساب؟ <a href="#" onclick="doSignup();return false" style="color:var(--b);font-weight:700">اعمل حساب جديد</a></div>
  <div style="margin-top:6px"><a href="#" onclick="doReset();return false" class="k" style="font-size:13px">نسيت كلمة السر؟</a></div>
  <p id="authMsg" style="margin-top:12px;color:var(--r);font-size:13px;min-height:16px"></p>
  </div>
@@ -309,6 +320,24 @@ function doSignup(){const em=v('authEmail').trim(),ps=v('authPass');if(!em||!ps)
 function doLogin(){const em=v('authEmail').trim(),ps=v('authPass');if(!em||!ps)return $('authMsg').textContent='اكتب الإيميل وكلمة السر';const per=$('rememberMe').checked?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION;_fbauth.setPersistence(per).then(()=>_fbauth.signInWithEmailAndPassword(em,ps)).catch(e=>$('authMsg').textContent=authErr(e))}
 function doReset(){const em=v('authEmail').trim();if(!em)return $('authMsg').textContent='اكتب الإيميل الأول';_fbauth.sendPasswordResetEmail(em).then(()=>{$('authMsg').style.color='var(--g)';$('authMsg').textContent='اتبعت لينك إعادة التعيين على إيميلك'}).catch(e=>$('authMsg').textContent=authErr(e))}
 async function doLogout(){const ok=await modalConfirm('تسجيل خروج من الحساب؟');if(ok)_fbauth.signOut()}
+async function googleLogin(){
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    const per = $('rememberMe').checked 
+      ? firebase.auth.Auth.Persistence.LOCAL 
+      : firebase.auth.Auth.Persistence.SESSION;
+    await _fbauth.setPersistence(per);
+    await _fbauth.signInWithPopup(provider);
+    // الـ onAuthStateChanged هيتعامل مع الدخول
+  }catch(e){
+    console.error(e);
+    if(e.code==='auth/popup-blocked') toast('المتصفح منع النافذة، اسمح بالنوافذ المنبثقة');
+    else if(e.code==='auth/popup-closed-by-user') toast('اتلغى الدخول');
+    else if(e.code==='auth/account-exists-with-different-credential') toast('الإيميل ده مسجل بطريقة تانية');
+    else toast('خطأ: '+e.message);
+  }
+}
 
 let D={s:[],b:[],e:[],i:[],r:[],t:[],w:[],cr:[],cat:[],sup:[],cus:[],cashAdj:[],returns:[],cashStart:0,th:1};
 const V=[['dash','لوحة التحكم'],['sales','المبيعات'],['buys','المشتريات'],['exps','المصروفات'],['tr','التحويلات'],['inv','المخزون'],['sup','الموردين'],['cus','العملاء'],['cash','الخزنة'],['inst','الأقساط'],['rep','الصيانة'],['rpt','التقارير'],['team','الفريق'],['audit','سجل العمليات'],['data','البيانات']];
